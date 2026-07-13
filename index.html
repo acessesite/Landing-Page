@@ -391,7 +391,7 @@
           <span class="con-live"><span class="pulse"></span>Painel comercial · ao vivo</span>
           <span class="con-menu"><i></i><i></i><i></i></span>
         </div>
-        <div class="con-figure"><span class="big">R$ 4,82M</span><span class="delta">▲ 18,4%</span></div>
+        <div class="con-figure"><span class="big money-tick" data-pre="R$ ">R$ 1,50M</span><span class="delta">▲ 18,4%</span></div>
         <div class="con-label">Faturamento · últimos 12 meses</div>
         <svg class="chart" viewBox="0 0 480 150" preserveAspectRatio="none">
           <defs><linearGradient id="fill" x1="0" y1="0" x2="0" y2="1">
@@ -509,7 +509,7 @@
         <div class="metric"><b><em><span class="count" data-to="340" data-pre="+" data-suf="%">+0%</span></em></b><span>Crescimento médio de faturamento no 1º ano</span></div>
         <div class="metric"><b><span class="count" data-to="180" data-pre="+">+0</span></b><span>Empresas com o comercial estruturado</span></div>
         <div class="metric"><b><span class="count" data-to="8">0</span></b><span>Anos construindo máquinas comerciais</span></div>
-        <div class="metric"><b><span class="count" data-to="100" data-pre="R$ " data-suf="M+">R$ 0M+</span></b><span>Em vendas geradas para clientes</span></div>
+        <div class="metric"><b><span class="money-tick" data-pre="+R$ ">+R$ 1,50M</span></b><span>Em vendas geradas para clientes</span></div>
       </div>
     </div>
   </section>
@@ -697,6 +697,27 @@
       cell.style.animationDuration=(3.5+Math.random()*3)+'s';
       document.body.appendChild(cell); }
   }
+
+  // valores em dinheiro: intercalam suavemente entre R$1,50M e R$2,00M
+  function fmtM(v,pre){ return pre + v.toFixed(2).replace('.',',') + "M"; }
+  function moneyTicker(el){
+    var pre = el.dataset.pre || "R$ ";
+    if(reduce){ el.textContent = fmtM(2.00, pre); return; }
+    var lo=1.50, hi=2.00, cur=lo, tgt=hi;
+    (function run(){
+      var s=null, from=cur, to=tgt, d=1700;
+      (function step(t){ if(!s)s=t; var p=Math.min((t-s)/d,1); var e=1-Math.pow(1-p,3);
+        el.textContent = fmtM(from+(to-from)*e, pre);
+        if(p<1){ requestAnimationFrame(step); }
+        else { cur=to; tgt=(to===hi)?lo:hi; setTimeout(run,1500); }
+      })();
+    })();
+  }
+  document.querySelectorAll('.money-tick').forEach(function(el){
+    var o=new IntersectionObserver(function(en){en.forEach(function(x){
+      if(x.isIntersecting){ moneyTicker(el); o.unobserve(el); } });},{threshold:.4});
+    o.observe(el);
+  });
 </script>
 </body>
 </html>
